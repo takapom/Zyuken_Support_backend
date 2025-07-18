@@ -1,4 +1,3 @@
-// ユーザーに関する処理
 package service
 
 import (
@@ -21,12 +20,19 @@ func NewUserService(userRepo *repository.UserRepository) *UserService {
 	}
 }
 
+// 新規登録用の入力型
 type CreateUserInput struct {
 	Email          string
 	Password       string
 	Name           string
 	Department     string
 	GraduationYear int
+}
+
+// ログイン用の入力型
+type LoginInput struct {
+	Email    string
+	Password string
 }
 
 func (s *UserService) CreateUser(input *CreateUserInput) (*model.User, error) {
@@ -68,4 +74,31 @@ func (s *UserService) CreateUser(input *CreateUserInput) (*model.User, error) {
 
 	user.Password = ""
 	return user, nil
+}
+
+func (s *UserService) Authenticate(input *LoginInput) (*model.User, string, error) {
+	if input.Email == "" {
+		return nil, "", errors.New("email is required")
+	}
+	if input.Password == "" {
+		return nil, "", errors.New("password is required")
+	}
+
+	// メールアドレスでユーザーを検索
+	user, err := s.userRepo.FindByEmail(input.Email)
+	if err != nil {
+		return nil, "", errors.New("invalid email or password")
+	}
+
+	// パスワードの検証
+	if err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(input.Password)); err != nil {
+		return nil, "", errors.New("invalid email or password")
+	}
+
+	// TODO: JWTトークンの生成（現在は仮のトークン）
+	token := "dummy-token-" + user.ID
+
+	// パスワードを削除してから返す
+	user.Password = ""
+	return user, token, nil
 }
