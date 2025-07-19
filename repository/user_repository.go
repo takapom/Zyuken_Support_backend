@@ -28,3 +28,8 @@ func (r *UserRepository) FindByEmail(email string) (*model.User, error) {
 	}
 	return &user, nil
 }
+
+// 新規学校の追加処理
+func (r *UserRepository) AddSchool(newschool *model.School) error {
+	return r.db.Create(newschool).Error
+}

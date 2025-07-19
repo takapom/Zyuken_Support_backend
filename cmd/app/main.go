@@ -48,7 +48,7 @@ func main() {
 	userService := service.NewUserService(userRepo)
 	userHandler := handler.NewUserHandler(userService)
 
-	// Ginルーターの設定
+	// ユーザーからのアクセスは一度routerに入る
 	router := gin.Default()
 
 	// CORS設定
